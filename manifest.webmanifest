@@ -1,0 +1,10 @@
+{
+  "name": "MY RUN – Suivi sportif personnel",
+  "short_name": "MY RUN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f8",
+  "theme_color": "#10283b",
+  "description": "Carnet personnel de séances de tapis et de suivi des mesures."
+}

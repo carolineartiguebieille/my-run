@@ -1,0 +1,21 @@
+# MY RUN – version installable Android (PWA)
+
+Cette version est une application web progressive (PWA) : elle peut être ajoutée à l'écran d'accueil Android depuis Chrome et fonctionner hors connexion après son premier chargement.
+
+## Données et confidentialité
+- Les séances et mesures sont enregistrées dans le stockage local du navigateur (`localStorage`) sur cet appareil.
+- Aucune connexion à un compte ni synchronisation en ligne n'est utilisée.
+- Les données du navigateur peuvent être effacées par le nettoyage des données du site ou la désinstallation/réinitialisation du navigateur.
+- Utilise régulièrement « Exporter mes données » dans Historique pour créer une sauvegarde JSON. Garde ce fichier dans un endroit sûr. L'import remplace les données actuelles.
+
+## Installation sur Android
+Une PWA doit être servie depuis une adresse HTTPS (ou localhost) pour être installable et pour activer le mode hors connexion. Les fichiers du projet peuvent être publiés sur un hébergement statique HTTPS (par exemple GitHub Pages). L'hébergement sert les fichiers de l'application ; les données personnelles restent dans le navigateur du téléphone et ne sont pas envoyées à cet hébergement.
+
+1. Décompresse `my_run_android.zip`.
+2. Publie le contenu du dossier sur un hébergement statique HTTPS.
+3. Ouvre l'adresse du site dans Chrome sur Android.
+4. Menu ⋮ > « Installer l'application » ou « Ajouter à l'écran d'accueil ».
+5. Ouvre MY RUN depuis son icône. Lance-la une première fois avec Internet pour mettre les fichiers en cache ; ensuite elle pourra s'ouvrir hors connexion.
+
+## Limites
+Ceci est une PWA installable, pas encore un APK natif distribué via Play Store. Le stockage local est lié au navigateur/profil Android utilisé. Pour changer de téléphone, exporte le JSON puis importe-le sur le nouvel appareil.

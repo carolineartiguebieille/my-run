@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10283b">
+<meta name="description" content="Ton carnet personnel de suivi sportif.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>MY RUN</title>
+<style>
+:root{--navy:#10283b;--green:#38d996;--bg:#f3f6f8;--card:#fff;--muted:#6b7b88;--line:#e3e9ed;--danger:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172b3a}
+header{background:var(--navy);color:#fff;padding:22px 18px 20px;border-radius:0 0 24px 24px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:1.5px;font-size:23px}
+.brand span{color:var(--green)}header p{color:#c2d0da;margin:8px 0 0;font-size:14px}
+main{max-width:760px;margin:auto;padding:16px 14px 40px}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:0 0 18px}
+nav button{border:0;border-radius:12px;padding:11px 3px;background:#e4ebef;color:#385064;font-weight:700;font-size:12px}
+nav button.active{background:#d9f8eb;color:#08794d}
+h2{font-size:21px;margin:10px 0 14px}
+h3{font-size:16px;margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:16px;margin:12px 0;box-shadow:0 3px 12px #17364a08}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#f4f8f9;border-radius:13px;padding:13px}
+.stat strong{display:block;font-size:25px;color:#0b8a5a;line-height:1.2}
+.stat small{color:var(--muted)}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px}
+input,select,textarea{width:100%;border:1px solid #cfd9df;border-radius:11px;padding:12px;font:inherit;background:#fff;color:#172b3a}
+button.primary{width:100%;border:0;border-radius:12px;background:#0b8a5a;color:white;font-weight:800;padding:13px;margin-top:15px;font-size:15px}
+button.secondary{border:1px solid #cfd9df;border-radius:10px;background:white;color:#233d50;padding:10px 12px;font-weight:700}
+button.danger{border:0;background:#fff0ee;color:var(--danger);padding:8px 10px;border-radius:9px;font-weight:700}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.muted{color:var(--muted);font-size:13px}
+.item{border-top:1px solid var(--line);padding:13px 0}
+.item:first-of-type{border-top:0}
+.item strong{font-size:15px}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.pill{background:#edf5f2;border-radius:20px;padding:5px 9px;font-size:12px;color:#24644c}
+canvas{width:100%;height:210px;display:block}
+.empty{text-align:center;color:var(--muted);padding:22px 10px}
+.hidden{display:none!important}
+.notice{background:#fff8e6;border:1px solid #f1dfaa;padding:12px;border-radius:12px;color:#735b19;font-size:13px;line-height:1.45}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+footer{text-align:center;color:#82909a;font-size:11px;margin-top:22px}
+@media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">✦ <span>MY</span> RUN</div>
+ <p>Ton parcours. Ton rythme. Tes progrès.</p>
+</header>
+<main>
+<nav>
+ <button class="active" data-tab="home">Accueil</button>
+ <button data-tab="session">Séance +</button>
+ <button data-tab="weight">Poids</button>
+ <button data-tab="history">Historique</button>
+</nav>
+
+<section id="home">
+ <h2>Ton tableau de bord</h2>
+ <div class="stats">
+  <div class="stat"><strong id="totalKm">0,00</strong><small>km parcourus</small></div>
+  <div class="stat"><strong id="countSessions">0</strong><small>séances</small></div>
+  <div class="stat"><strong id="totalTime">0 h 00</strong><small>temps total</small></div>
+  <div class="stat"><strong id="avgSpeed">—</strong><small>vitesse moyenne</small></div>
+ </div>
+ <div class="card"><h3>Distances par séance</h3><canvas id="distanceChart" width="650" height="210"></canvas><div id="distanceEmpty" class="empty">Tes distances apparaîtront ici après ta première séance.</div></div>
+ <div class="card"><h3>Suivi du poids</h3><div class="row"><strong id="latestWeight">Aucune mesure</strong><span class="muted" id="weightDate"></span></div><canvas id="weightChart" width="650" height="210"></canvas><div id="weightEmpty" class="empty">Ajoute une mesure pour commencer ton historique.</div></div>
+ <div class="notice">Tes informations sont conservées localement dans ce navigateur sur cet appareil. Elles ne sont pas envoyées vers un compte en ligne. Pense à exporter régulièrement une copie de sauvegarde.</div>
+</section>
+
+<section id="session" class="hidden">
+ <h2>Enregistrer une séance</h2>
+ <div class="card">
+  <form id="sessionForm">
+   <label for="sDate">Date</label><input id="sDate" type="date" required>
+   <label for="sDistance">Distance parcourue (km)</label><input id="sDistance" type="number" min="0.01" step="0.01" placeholder="Ex. 3,5" required>
+   <label for="sDuration">Durée (minutes)</label><input id="sDuration" type="number" min="1" step="1" placeholder="Ex. 30" required>
+   <label for="sSpeed">Vitesse moyenne (km/h)</label><input id="sSpeed" type="number" min="0.1" step="0.1" placeholder="Ex. 7" required>
+   <label for="sFeeling">Ressenti</label><select id="sFeeling"><option>Très bien</option><option selected>Bien</option><option>Moyennement</option><option>Difficile</option></select>
+   <label for="sNotes">Notes (facultatif)</label><textarea id="sNotes" rows="2" placeholder="Inclinaison, sensations, remarques…"></textarea>
+   <button class="primary">Enregistrer la séance</button>
+  </form>
+ </div>
+</section>
+
+<section id="weight" class="hidden">
+ <h2>Mon suivi du poids</h2>
+ <div class="card">
+  <form id="weightForm">
+   <label for="wDate">Date de la mesure</label><input id="wDate" type="date" required>
+   <label for="wValue">Poids (kg)</label><input id="wValue" type="number" min="1" max="500" step="0.1" placeholder="Ex. 68,5" required>
+   <label for="wNotes">Notes (facultatif)</label><textarea id="wNotes" rows="2" placeholder="Contexte ou remarque…"></textarea>
+   <button class="primary">Enregistrer la mesure</button>
+  </form>
+ </div>
+ <div class="card"><h3>Évolution dans le temps</h3><canvas id="weightChartLarge" width="650" height="230"></canvas><div id="weightEmptyLarge" class="empty">Aucune mesure enregistrée pour le moment.</div></div>
+ <p class="muted">Les variations peuvent être normales. Le graphique sert à consulter tes relevés, sans imposer de cible.</p>
+</section>
+
+<section id="history" class="hidden">
+ <h2>Mon historique</h2>
+ <div class="card"><h3>Séances</h3><div id="sessionList" class="empty">Aucune séance enregistrée.</div></div>
+ <div class="card"><h3>Mesures de poids</h3><div id="weightList" class="empty">Aucune mesure enregistrée.</div></div>
+ <div class="card">
+  <h3>Sauvegarde et transfert</h3>
+  <p class="muted">Exporte un fichier de sauvegarde à conserver dans un endroit sûr. Tu peux aussi importer une sauvegarde sur ce téléphone.</p>
+  <div class="actions"><button class="secondary" id="exportBtn">Exporter mes données</button><button class="secondary" id="importBtn">Importer une sauvegarde</button><input id="importFile" type="file" accept="application/json" class="hidden"></div>
+ </div>
+</section>
+<footer>MY RUN • Stockage local sur cet appareil</footer>
+</main>
+<script>
+const DB_KEY='myrun-local-v1';
+let data={sessions:[],weights:[]};
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+$('sDate').value=today();$('wDate').value=today();
+function load(){try{const x=JSON.parse(localStorage.getItem(DB_KEY)||'null');if(x&&Array.isArray(x.sessions)&&Array.isArray(x.weights))data=x}catch(e){console.warn('Données locales illisibles',e)}}
+function save(){localStorage.setItem(DB_KEY,JSON.stringify(data));render()}
+function fmt(n,d=1){return Number(n).toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function dateFmt(s){return new Date(s+'T12:00:00').toLocaleDateString('fr-FR')}
+function render(){
+ const km=data.sessions.reduce((a,s)=>a+s.distance,0), mins=data.sessions.reduce((a,s)=>a+s.duration,0);
+ $('totalKm').textContent=fmt(km,2);$('countSessions').textContent=data.sessions.length;
+ $('totalTime').textContent=Math.floor(mins/60)+' h '+String(mins%60).padStart(2,'0');
+ $('avgSpeed').textContent=data.sessions.length?fmt(data.sessions.reduce((a,s)=>a+s.speed,0)/data.sessions.length)+' km/h':'—';
+ const sortedW=[...data.weights].sort((a,b)=>a.date.localeCompare(b.date));
+ const latest=sortedW.at(-1);$('latestWeight').textContent=latest?fmt(latest.value)+' kg':'Aucune mesure';$('weightDate').textContent=latest?dateFmt(latest.date):'';
+ drawBars($('distanceChart'),data.sessions.map(s=>s.distance));$('distanceEmpty').classList.toggle('hidden',data.sessions.length>0);
+ drawLine($('weightChart'),sortedW.map(w=>w.value));$('weightEmpty').classList.toggle('hidden',sortedW.length>0);
+ drawLine($('weightChartLarge'),sortedW.map(w=>w.value));$('weightEmptyLarge').classList.toggle('hidden',sortedW.length>0);
+ $('sessionList').innerHTML=data.sessions.length?[...data.sessions].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`<div class="item"><div class="row"><strong>${dateFmt(s.date)}</strong><button class="danger" data-delete-session="${s.id}">Supprimer</button></div><div class="pills"><span class="pill">${fmt(s.distance,2)} km</span><span class="pill">${s.duration} min</span><span class="pill">${fmt(s.speed)} km/h</span><span class="pill">${s.feeling}</span></div>${s.notes?`<p class="muted">${esc(s.notes)}</p>`:''}</div>`).join(''):'<div class="empty">Aucune séance enregistrée.</div>';
+ $('weightList').innerHTML=data.weights.length?[...data.weights].sort((a,b)=>b.date.localeCompare(a.date)).map(w=>`<div class="item"><div class="row"><strong>${dateFmt(w.date)} · ${fmt(w.value)} kg</strong><button class="danger" data-delete-weight="${w.id}">Supprimer</button></div>${w.notes?`<p class="muted">${esc(w.notes)}</p>`:''}</div>`).join(''):'<div class="empty">Aucune mesure enregistrée.</div>';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function drawBars(canvas,values){const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);if(!values.length)return;const max=Math.max(...values,1)*1.15,slot=w/values.length,bw=Math.min(54,slot*.55);values.forEach((v,i)=>{const bh=v/max*(h-35),x=i*slot+(slot-bw)/2;c.fillStyle='#19a875';c.beginPath();c.roundRect(x,h-bh-20,bw,bh,7);c.fill();c.fillStyle='#526675';c.font='13px system-ui';c.textAlign='center';c.fillText(fmt(v,1),x+bw/2,h-5)})}
+function drawLine(canvas,values){const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);if(!values.length)return;const min=Math.min(...values)-1,max=Math.max(...values)+1,range=Math.max(max-min,1),pad=28;c.strokeStyle='#d8e3e8';c.lineWidth=2;c.beginPath();c.moveTo(pad,h-pad);c.lineTo(w-pad,h-pad);c.stroke();if(values.length===1){const y=h-pad-(values[0]-min)/range*(h-2*pad);c.fillStyle='#159b67';c.beginPath();c.arc(w/2,y,6,0,Math.PI*2);c.fill();c.fillStyle='#526675';c.textAlign='center';c.fillText(fmt(values[0])+' kg',w/2,y-14);return}c.strokeStyle='#159b67';c.lineWidth=4;c.beginPath();values.forEach((v,i)=>{const x=pad+i*(w-2*pad)/(values.length-1),y=h-pad-(v-min)/range*(h-2*pad);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();values.forEach((v,i)=>{const x=pad+i*(w-2*pad)/(values.length-1),y=h-pad-(v-min)/range*(h-2*pad);c.fillStyle='#159b67';c.beginPath();c.arc(x,y,5,0,Math.PI*2);c.fill()})}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hidden',s.id!==b.dataset.tab))}));
+$('sessionForm').addEventListener('submit',e=>{e.preventDefault();data.sessions.push({id:crypto.randomUUID(),date:$('sDate').value,distance:Number($('sDistance').value),duration:Number($('sDuration').value),speed:Number($('sSpeed').value),feeling:$('sFeeling').value,notes:$('sNotes').value.trim()});save();e.target.reset();$('sDate').value=today();document.querySelector('[data-tab="home"]').click()});
+$('weightForm').addEventListener('submit',e=>{e.preventDefault();data.weights.push({id:crypto.randomUUID(),date:$('wDate').value,value:Number($('wValue').value),notes:$('wNotes').value.trim()});save();e.target.reset();$('wDate').value=today();document.querySelector('[data-tab="home"]').click()});
+document.addEventListener('click',e=>{const s=e.target.dataset.deleteSession,w=e.target.dataset.deleteWeight;if(s&&confirm('Supprimer cette séance ?')){data.sessions=data.sessions.filter(x=>x.id!==s);save()}if(w&&confirm('Supprimer cette mesure ?')){data.weights=data.weights.filter(x=>x.id!==w);save()}});
+$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({format:'MYRUN_BACKUP_V1',exportedAt:new Date().toISOString(),...data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-run-sauvegarde-'+today()+'.json';a.click();URL.revokeObjectURL(a.href)});
+$('importBtn').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!Array.isArray(x.sessions)||!Array.isArray(x.weights))throw Error();if(!confirm('Importer cette sauvegarde et remplacer les données présentes sur ce téléphone ?'))return;data={sessions:x.sessions,weights:x.weights};save();alert('Sauvegarde importée.')}catch(err){alert('Fichier de sauvegarde non reconnu.')}e.target.value=''});
+load();render();
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.error));
+</script>
+</body></html>
